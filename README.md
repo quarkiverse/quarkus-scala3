@@ -217,6 +217,8 @@ With some finagling, it's possible to replicate this (mostly) in Scala.
 
 Here's a working outline that supports everything but `.extract()` -- a PR or issue comment adding the `.extract()` case is much-welcomed:
 
+- Acknowledgements here should be given to Christopher Davenport from the Scala Discord for sharing the outline of how this sort of API could be written
+
 ```scala
 import io.restassured.RestAssured.*
 import io.restassured.internal.{ResponseSpecificationImpl, ValidatableResponseImpl}
