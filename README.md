@@ -279,6 +279,8 @@ You can use this to write route handlers which are much more functional-feeling,
 ```scala
 import io.quarkus.runtime.annotations.QuarkusMain
 import io.quarkus.runtime.{Quarkus, QuarkusApplication}
+import io.vertx.core.Vertx
+import io.vertx.ext.web.Router
 
 object Application:
   def main(args: Array[String]): Unit =
@@ -289,7 +291,7 @@ class Application extends QuarkusApplication:
   override def run(args: String*): Int =
     val vertx = CDI.current().select(classOf[Vertx]).get()
     val router = Router.router(vertx)
-    mkRoutes()
+    mkRoutes(router)
     Quarkus.waitForExit()
     0
 
