@@ -24,49 +24,12 @@ import io.quarkus.deployment.dev.CompilationProvider;
 /**
  * Main.process() documentation for "dotty-interface" overload used here.
  * Architectural Decision Record, see javadoc comment below on why this particular appoach was used
- * <p>
+ * 
  * Notes:
  * - This requires scala3-compiler in the dependencies and classpath of the consuming application
  * - But it allows Quarkus to remain version-agnostic to Scala 3 compilation
  * - We call the user's Scala 3 library to do the compiling
- * <p>
- * Ref:
- * - https://github.com/lampepfl/dotty/blob/b7d2a122555a6aa44cc7590852a80f12512c535e/compiler/src/dotty/tools/dotc/Driver.scala#L122-L145
- * - https://github.com/lampepfl/dotty/blob/b7d2a122555a6aa44cc7590852a80f12512c535e/compiler/test/dotty/tools/dotc/InterfaceEntryPointTest.scala
- * Entry point to the compiler that can be conveniently used with Java reflection.
- * <p>
- * This entry point can easily be used without depending on the `dotty` package,
- * you only need to depend on `dotty-interfaces` and call this method using
- * reflection. This allows you to write code that will work against multiple
- * versions of dotty without recompilation.
- * <p>
- * The trade-off is that you can only pass a SimpleReporter to this method
- * and not a normal Reporter which is more powerful.
- * <p>
- * Usage example: [[https://github.com/lampepfl/dotty/tree/master/compiler/test/dotty/tools/dotc/InterfaceEntryPointTest.scala]]
  *
- * @param args       Arguments to pass to the compiler.
- * @param simple     Used to log errors, warnings, and info messages.
- * The default reporter is used if this is `null`.
- * @param callback   Used to execute custom code during the compilation
- * process. No callbacks will be executed if this is `null`.
- * @return Entry point to the compiler that can be conveniently used with Java reflection.
- * <p>
- * This entry point can easily be used without depending on the `dotty` package,
- * you only need to depend on `dotty-interfaces` and call this method using
- * reflection. This allows you to write code that will work against multiple
- * versions of dotty without recompilation.
- * <p>
- * The trade-off is that you can only pass a SimpleReporter to this method
- * and not a normal Reporter which is more powerful.
- * <p>
- * Usage example: [[https://github.com/lampepfl/dotty/tree/master/compiler/test/dotty/tools/dotc/InterfaceEntryPointTest.scala]]
- * @param args       Arguments to pass to the compiler.
- * @param simple     Used to log errors, warnings, and info messages.
- * The default reporter is used if this is `null`.
- * @param callback   Used to execute custom code during the compilation
- * process. No callbacks will be executed if this is `null`.
- * @return
  */
 
 /** Entry point to the compiler that can be conveniently used with Java reflection.
