@@ -123,7 +123,7 @@ public class Scala3CompilationProvider implements CompilationProvider {
                 .collect(Collectors.toList());
 
         String outdir = context.getOutputDirectory().getAbsolutePath();
-        
+
         String classpath = context.getClasspath().stream()
                 .map(File::getAbsolutePath)
                 .collect(Collectors.joining(File.pathSeparator));
