@@ -4,6 +4,7 @@
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Useful tips and tricks for building Quarkus apps with Scala, common patterns](#useful-tips-and-tricks-for-building-quarkus-apps-with-scala-common-patterns)
+    - ["No tests were found"?! How can that be?](#no-tests-were-found-how-can-that-be)
     - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
     - [Scala DSL for rest-assured (similar to Kotlin DSL)](#scala-dsl-for-rest-assured-similar-to-kotlin-dsl)
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
@@ -118,6 +119,30 @@ QUARKUS_SCALA3_COMPILER_ARGS="-deprecated,-explain,-feature,-Ysafe-init" mvn qua
 You might save this as a bash/powershell/batch script for convenience.
 
 ## Useful tips and tricks for building Quarkus apps with Scala, common patterns
+
+### "No tests were found"?! How can that be?
+
+JUnit requires tests to return type `void`. Scala functions which are not annotated with `: Unit` return type `Scala.Nothing`, rather than `void`.
+This means that tests such as the `undiscoverable test` below will never be detected by JUnit.
+
+See this issue for more information:
+- https://github.com/junit-team/junit5/issues/2659
+  
+Please voice your support for a better developer experience around this behavior if it feels poor to you, by commenting on this issue:
+- https://github.com/junit-team/junit5/issues/242
+
+```scala
+@QuarkusTest
+class MyTest:
+
+  @Test
+  def `undiscoverable test` =
+    assert(1 == 1)
+
+  @Test
+  def `discoverable test`: Unit =
+    assert(2 == 2)
+```
 
 ### Configuring Scala Jackson and the addon-on "Enum" module for JSON support
 
