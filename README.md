@@ -28,7 +28,9 @@ Additionally, passing compiler flags when in Dev Mode is supported through the u
 
 ### Gradle
 
-Note: At the time of publishing, support for Scala 3 in Gradle is dependent on a not-yet-merged PR.
+> Note: At the time of publishing, support for Scala 3 in Gradle is dependent on a not-yet-merged PR.
+>
+> https://github.com/gradle/gradle/pull/18001
 
 ```groovy
 buildscript {
@@ -123,7 +125,7 @@ In your `pom.xml` file, add:
 
 Then, you will need to install the Scala 3 compiler, the Scala Maven plugin, and to fix an odd bug with the way that the Scala 3 compiler Maven dependencies are resolved.
 
-For some reason, the wrong version of `scala-library` (a transitive dependency: `scala3-compiler_3` -> `scala3-library_3` -> `scala-library`) is resolved.
+Due to Scala 2 version in upstream `Quarkus BOM`, the wrong version of `scala-library` (a transitive dependency: `scala3-compiler_3` -> `scala3-library_3` -> `scala-library`) is resolved.
 
 This causes binary incompatibilities -- and Scala to break. In order to fix this, you just need to manually align the version of `scala-library` to the one listed as used by the version of `scala3-library_3` that's the same as the `scala3-compiler_3` version.
 
