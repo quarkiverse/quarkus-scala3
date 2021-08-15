@@ -24,7 +24,7 @@ import io.quarkus.deployment.dev.CompilationProvider;
 /**
  * Main.process() documentation for "dotty-interface" overload used here.
  * Architectural Decision Record, see javadoc comment below on why this particular appoach was used
- * 
+ *
  * Notes:
  * - This requires scala3-compiler in the dependencies and classpath of the consuming application
  * - But it allows Quarkus to remain version-agnostic to Scala 3 compilation

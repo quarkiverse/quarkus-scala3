@@ -3,6 +3,9 @@
 - [Quarkus - Scala3](#quarkus---scala3)
   - [Introduction](#introduction)
   - [Installation](#installation)
+    - [Gradle](#gradle)
+    - [Maven](#maven)
+  - [Passing Scala compiler args in Quarkus Dev Mode](#passing-scala-compiler-args-in-quarkus-dev-mode)
   - [Useful tips and tricks for building Quarkus apps with Scala, common patterns](#useful-tips-and-tricks-for-building-quarkus-apps-with-scala-common-patterns)
     - ["No tests were found"?! How can that be?](#no-tests-were-found-how-can-that-be)
     - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
@@ -18,10 +21,94 @@ Instead, the reflection-based API is used and compilation is done by invoking th
 
 For more information and background context on this, there are notes in the `Scala3CompilationProvider.java` file.
 
-Additionally, passing compiler flags when in Dev Mode is supported through the use of an environment variable (`QUARKUS_SCALA3_COMPILER_ARGS`) which allows you to mirror your existing Maven/Gradle (at the time of writing Gradle does not yet support Scala 3) compilation configuration.
+Additionally, passing compiler flags when in Dev Mode is supported through the use of an environment variable (`QUARKUS_SCALA3_COMPILER_ARGS`) which allows you to mirror your existing Maven/Gradle compilation configuration.
 
 
 ## Installation
+
+### Gradle
+
+Note: At the time of publishing, support for Scala 3 in Gradle is dependent on a not-yet-merged PR.
+
+```groovy
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "ch.epfl.scala:gradle-bloop_2.12:1.4.8-106-8722ebfd"
+    }
+}
+
+plugins {
+    id "java"
+    id "scala"
+    id "io.quarkus"
+}
+
+// Bloop plugin uses old DSL -- MUST be applied like this
+apply plugin: "bloop"
+// This configuration dependent on the following PR being merged into bloop, can be removed after merge
+// https://github.com/scalacenter/bloop/pull/1548
+bloop {
+    stdLibName = "scala3-library_3"
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+VERSIONS = [
+  SCALA3: "3.0.0",
+  QUARKUS_SCALA3: "0.0.1"
+]
+
+dependencies {
+    implementation "org.scala-lang:scala3-compiler_3:$VERSIONS.SCALA3"
+    implementation "io.quarkiverse.scala:quarkus-scala3:$VERSIONS.QUARKUS_SCALA3"
+
+    // Quarkus comes with Scala 2 distributed in it's Bill-of-Materials unfortunately
+    // It's Scala 2.12.13, which is not ABI compatible -- With Scala 3, we need to exclude this entirely
+    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))  {
+         exclude group: 'org.scala-lang', module: 'scala-library'
+    }
+    implementation "io.quarkus:quarkus-arc"
+    implementation "io.quarkus:quarkus-resteasy-reactive"
+
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.rest-assured:rest-assured"
+}
+
+group = "org.hasura"
+version = "1.0.0-SNAPSHOT"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
+}
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = [
+        "-feature",
+        "-explain",
+        "-Ysafe-init",
+        "-Xsemanticdb"
+    ]
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+```
+
+### Maven
 
 If you want to use this extension, you need to add the `io.quarkiverse.scala:quarkus-scala3` extension first.
 In your `pom.xml` file, add:
@@ -30,6 +117,7 @@ In your `pom.xml` file, add:
 <dependency>
     <groupId>io.quarkiverse.scala</groupId>
     <artifactId>quarkus-scala3</artifactId>
+    <version>0.0.1<version>
 </dependency>
 ```
 
@@ -107,6 +195,8 @@ Here, we can see that it was compiled with `2.13.5` in it's dependencies. So tha
     </plugin>
 </build>
 ```
+
+## Passing Scala compiler args in Quarkus Dev Mode
 
 Finally, the last thing you want to do is make sure that you mirror any compiler args you have set up when you run in Dev Mode.
 
