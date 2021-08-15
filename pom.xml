@@ -8,7 +8,7 @@
   </parent>
   <groupId>io.quarkiverse.scala</groupId>
   <artifactId>quarkus-scala3-parent</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Quarkus - Scala3 - Parent</name>
   <modules>
@@ -67,8 +67,4 @@
       </modules>
     </profile>
   </profiles>
-
-  <scm>
-    <tag>0.0.1</tag>
-  </scm>
 </project>
