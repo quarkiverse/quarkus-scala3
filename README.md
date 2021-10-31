@@ -28,33 +28,15 @@ Additionally, passing compiler flags when in Dev Mode is supported through the u
 
 ### Gradle
 
-> Note: At the time of publishing, support for Scala 3 in Gradle is dependent on a not-yet-merged PR.
->
-> https://github.com/gradle/gradle/pull/18001
+> Note: Gradle support requires a minimum of Gradle 7.3-RC, preferably the latest version.
+> For example, as of today: `distributionUrl=https://services.gradle.org/distributions/gradle-7.3-rc-3-bin.zip`
+> Please use regular Gradle 7.3 or greater once they have been released.
 
 ```groovy
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "ch.epfl.scala:gradle-bloop_2.12:1.4.8-106-8722ebfd"
-    }
-}
-
 plugins {
     id "java"
     id "scala"
     id "io.quarkus"
-}
-
-// Bloop plugin uses old DSL -- MUST be applied like this
-apply plugin: "bloop"
-// This configuration dependent on the following PR being merged into bloop, can be removed after merge
-// https://github.com/scalacenter/bloop/pull/1548
-bloop {
-    stdLibName = "scala3-library_3"
 }
 
 repositories {
@@ -63,13 +45,31 @@ repositories {
 }
 
 VERSIONS = [
-  SCALA3: "3.0.0",
-  QUARKUS_SCALA3: "0.0.1"
+    SCALA3       : "3.1.1-RC1",
+    SCALA_LIBRARY: "2.13.6",
+    // Scala Jackson at time of writing doesn't support Scala 3 Enum's natively. It requires another library.
+    // That library doesn't support same version of Jackson that Quarkus BOM uses (2.12.5), so this is the best compromise
+    // https://search.maven.org/artifact/com.github.pjfanning/jackson-module-scala3-enum_3/2.12.3/jar
+    JACKSON      : "2.12.3"
 ]
 
 dependencies {
-    implementation "org.scala-lang:scala3-compiler_3:$VERSIONS.SCALA3"
-    implementation "io.quarkiverse.scala:quarkus-scala3:$VERSIONS.QUARKUS_SCALA3"
+    implementation "io.quarkiverse.scala:quarkus-scala3:${VERSIONS.QUARKUS_SCALA3}"
+    implementation("org.scala-lang:scala3-compiler_3") {
+        version {
+            strictly VERSIONS.SCALA3
+        }
+    }
+    implementation("org.scala-lang:scala3-library_3") {
+        version {
+            strictly VERSIONS.SCALA3
+        }
+    }
+    implementation("org.scala-lang:scala-library") {
+        version {
+            strictly VERSIONS.SCALA_LIBRARY
+        }
+    }
 
     // Quarkus comes with Scala 2 distributed in it's Bill-of-Materials unfortunately
     // It's Scala 2.12.13, which is not ABI compatible -- With Scala 3, we need to exclude this entirely
@@ -79,24 +79,32 @@ dependencies {
     implementation "io.quarkus:quarkus-arc"
     implementation "io.quarkus:quarkus-resteasy-reactive"
 
+    implementation "com.fasterxml.jackson.module:jackson-module-scala_3:${VERSIONS.JACKSON}"
+    implementation "com.github.pjfanning:jackson-module-scala3-enum_3:${VERSIONS.JACKSON}"
+
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.rest-assured:rest-assured"
 }
 
-group = "org.hasura"
+group = "org.acme"
 version = "1.0.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    // Set to 17 for performance reasons, feel free to change to 11 or 8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType(ScalaCompile) {
     scalaCompileOptions.additionalParameters = [
-        "-feature",
-        "-explain",
-        "-Ysafe-init",
-        "-Xsemanticdb"
+        "-feature", // Emit warnings and locations for features that should be imported explicitly
+        "-explain", // Explain (type) errors in more detail
+        "-Ysafe-init", // Ensure safe initialization of objects (prevent null object init)
+        "-Yrequire-targetName", // Warn if an operator is defined without a @targetName annotation
+        // "-Yexplicit-nulls", // Make reference types non-nullable. Nullable types can be expressed with unions: e.g. String|Null.
+
+        // I am unsure if this is required for proper tooling to work. Metals/IntelliJ may already cover this.
+        "-Xsemanticdb", // Store information in SemanticDB
     ]
 }
 
@@ -137,8 +145,8 @@ Here, we can see that it was compiled with `2.13.5` in it's dependencies. So tha
 ```xml
 <properties>
     <scala-maven-plugin.version>4.5.3</scala-maven-plugin.version>
-    <scala.version>3.0.0</scala.version>
-    <scala-library.version>2.13.5</scala-library.version>
+    <scala.version>3.1.0</scala.version>
+    <scala-library.version>2.13.6</scala-library.version>
 </properties>
 
 <dependencies>
@@ -259,7 +267,7 @@ To set this up:
 <dependency>
     <groupId>com.fasterxml.jackson.module</groupId>
     <artifactId>jackson-module-scala_2.13</artifactId>
-    <version>2.12.4</version>
+    <version>2.12.3</version>
 </dependency>
 ```
 
