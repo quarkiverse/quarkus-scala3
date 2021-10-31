@@ -45,7 +45,7 @@ repositories {
 }
 
 VERSIONS = [
-    SCALA3       : "3.1.1-RC1",
+    SCALA3       : "3.1.0",
     SCALA_LIBRARY: "2.13.6",
     // Scala Jackson at time of writing doesn't support Scala 3 Enum's natively. It requires another library.
     // That library doesn't support same version of Jackson that Quarkus BOM uses (2.12.5), so this is the best compromise
