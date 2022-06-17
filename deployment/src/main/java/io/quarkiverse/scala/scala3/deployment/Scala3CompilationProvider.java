@@ -115,7 +115,7 @@ public class Scala3CompilationProvider implements CompilationProvider {
     }
 
     @Override
-    public Path getSourcePath(Path classFilePath, PathsCollection sourcePaths, String classesPath) {
+    public Path getSourcePath(Path classFilePath, PathCollection sourcePaths, String classesPath) {
         return classFilePath;
     }
 
