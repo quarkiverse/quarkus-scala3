@@ -15,16 +15,18 @@
     <module>deployment</module>
     <module>runtime</module>
   </modules>
+  <scm>
+    <connection>:git:git@github.com:quarkiverse/quarkus-scala3.git</connection>
+    <developerConnection>scm:git:git@github.com:quarkiverse/quarkus-scala3.git</developerConnection>
+    <url>https://github.com/quarkiverse/quarkus-scala3</url>
+  </scm>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
-
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
     <quarkus.version>2.1.0.Final</quarkus.version>
   </properties>
   <dependencyManagement>
