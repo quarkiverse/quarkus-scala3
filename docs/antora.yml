@@ -1,5 +1,5 @@
 name: quarkus-scala3
-title: '- Scala3'
+title: Scala 3
 version: dev
 nav:
   - modules/ROOT/nav.adoc
