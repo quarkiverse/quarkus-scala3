@@ -18,8 +18,8 @@ import dotty.tools.dotc.interfaces.CompilerCallback;
 import dotty.tools.dotc.interfaces.Diagnostic;
 import dotty.tools.dotc.interfaces.SimpleReporter;
 import dotty.tools.dotc.interfaces.SourceFile;
-import io.quarkus.bootstrap.model.PathsCollection;
 import io.quarkus.deployment.dev.CompilationProvider;
+import io.quarkus.paths.PathCollection;
 
 /**
  * Main.process() documentation for "dotty-interface" overload used here.
