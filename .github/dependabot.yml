@@ -9,5 +9,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "org.apache.maven.plugins:maven-compiler-plugin"
