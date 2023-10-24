@@ -1,9 +1,9 @@
-name: Scala3
-#description: Scala3 ...
+name: Scala 3
+description: Scala 3 support
 metadata:
-#  keywords:
-#    - scala3
-#  guide: ...
-#  categories:
-#    - "miscellaneous"
-#  status: "preview"
+  keywords:
+    - scala
+  guide: https://docs.quarkiverse.io/quarkus-scala3/dev/index.html
+  categories:
+    - "alt-languages"
+  status: "preview"
