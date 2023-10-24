@@ -1,7 +1,7 @@
 package io.quarkiverse.scala.scala3.it;
 
-import io.quarkus.test.junit.NativeImageTest;
+import io.quarkus.test.junit.QuarkusIntegrationTest;
 
-@NativeImageTest
+@QuarkusIntegrationTest
 public class NativeScala3ResourceIT extends Scala3ResourceTest {
 }

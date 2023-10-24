@@ -16,9 +16,9 @@
 */
 package io.quarkiverse.scala.scala3.it;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 
 @Path("/scala3")
 @ApplicationScoped
