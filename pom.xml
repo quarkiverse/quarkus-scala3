@@ -8,7 +8,7 @@
   </parent>
   <groupId>io.quarkiverse.scala</groupId>
   <artifactId>quarkus-scala3-parent</artifactId>
-  <version>1.0.0</version>
+  <version>999-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Quarkus - Scala3 - Parent</name>
   <modules>
@@ -19,7 +19,7 @@
     <connection>:git:git@github.com:quarkiverse/quarkus-scala3.git</connection>
     <developerConnection>scm:git:git@github.com:quarkiverse/quarkus-scala3.git</developerConnection>
     <url>https://github.com/quarkiverse/quarkus-scala3</url>
-    <tag>1.0.0</tag>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
