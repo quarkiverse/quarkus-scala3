@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.quarkiverse.scala</groupId>
     <artifactId>quarkus-scala3-parent</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <artifactId>quarkus-scala3-integration-tests</artifactId>
   <name>Quarkus - Scala3 - Integration Tests</name>
