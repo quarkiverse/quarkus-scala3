@@ -13,9 +13,10 @@
   - [Passing Scala compiler args in Quarkus Dev Mode](#passing-scala-compiler-args-in-quarkus-dev-mode)
   - [Useful tips and tricks for building Quarkus apps with Scala, common patterns](#useful-tips-and-tricks-for-building-quarkus-apps-with-scala-common-patterns)
     - ["No tests were found"?! How can that be?](#no-tests-were-found-how-can-that-be)
-    - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
+    - [Scala and Jackson serialization for JSON with Scala Enum support](#scala-and-jackson-serialization-for-json-with-scala-enum-support)
     - [Scala DSL for rest-assured (similar to Kotlin DSL)](#scala-dsl-for-rest-assured-similar-to-kotlin-dsl)
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
+  - [Contributors ✨](#contributors-)
 
 ## Introduction 
 
@@ -250,10 +251,10 @@ class MyTest:
     assert(2 == 2)
 ```
 
-### Configuring Scala Jackson and the addon-on "Enum" module for JSON support
+### Scala and Jackson serialization for JSON with Scala Enum support
 
-You probably want JSON support for case class and enum serialization.
-There are two things you need to enable this, as of the time of writing:
+If using Jackson for serialization, you probably want JSON support for case class and Enum.
+There are two libraries you need to add to your project to enable this:
 
 1. The standard Jackson Scala module
 2. An addon module from one of the Jackson Scala maintainers for Scala 3 enums that hasn't made its way into the official module yet
@@ -261,43 +262,25 @@ There are two things you need to enable this, as of the time of writing:
 To set this up:
 
 - Add the following to your dependencies
-  
+
 ```xml
 <!-- JSON Serialization Dependencies -->
 <dependency>
-    <groupId>com.github.pjfanning</groupId>
-    <artifactId>jackson-module-scala3-enum_3</artifactId>
-    <version>2.12.3</version>
+  <groupId>com.fasterxml.jackson.module</groupId>
+  <artifactId>jackson-module-scala_3</artifactId>
+  <version>2.16.1</version>
 </dependency>
 
 <dependency>
-    <groupId>com.fasterxml.jackson.module</groupId>
-    <artifactId>jackson-module-scala_2.13</artifactId>
-    <version>2.12.3</version>
+  <groupId>com.github.pjfanning</groupId>
+  <artifactId>jackson-module-scala3-enum_3</artifactId>
+  <version>2.16.0</version>
 </dependency>
 ```
 
-- Set up something like the below in your codebase:
-  
-```scala
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.github.pjfanning.`enum`.EnumModule
-import io.quarkus.jackson.ObjectMapperCustomizer
+If these dependencies are added to the project, they will be automatically registered to the default `ObjectMapper` bean.
 
-import javax.inject.Singleton
-
-// https://quarkus.io/guides/rest-json#jackson
-@Singleton
-class Scala3ObjectMapperCustomizer extends ObjectMapperCustomizer:
-  def customize(mapper: ObjectMapper): Unit =
-    // General Scala support
-    // https://github.com/FasterXML/jackson-module-scala
-    mapper.registerModule(DefaultScalaModule)
-    // Suport for Scala 3 Enums
-    // https://github.com/pjfanning/jackson-module-scala3-enum
-    mapper.registerModule(EnumModule)
-```
+To ensure full-compatibility with native-image, it is recommended to apply the Jackson @field:JsonProperty("fieldName") annotation, and set a nullable default, as shown below.
 
 The API is usable like this:
 
@@ -310,13 +293,16 @@ import org.junit.jupiter.api.{DisplayName, Test}
 import javax.inject.Inject
 import scala.collection.JavaConverters.*
 
-
 enum AnEnum:
   case A extends AnEnum
   case B extends AnEnum
 
-case class Other(foo: String)
-case class Something(name: String, someEnum: AnEnum, other: Other)
+case class Other(@JsonProperty("foo") foo: String)
+case class Something(
+    @JsonProperty("name") name:         String,
+    @JsonProperty("someEnum") someEnum: AnEnum,
+    @JsonValue other:                   Other,
+  )
 
 @QuarkusTest
 class Scala3ObjectMapperCustomizerTest:
