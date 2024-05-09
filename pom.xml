@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.quarkiverse</groupId>
     <artifactId>quarkiverse-parent</artifactId>
-    <version>15</version>
+    <version>16</version>
   </parent>
   <groupId>io.quarkiverse.scala</groupId>
   <artifactId>quarkus-scala3-parent</artifactId>
@@ -14,6 +14,7 @@
   <modules>
     <module>deployment</module>
     <module>runtime</module>
+    <module>zio</module>
   </modules>
   <scm>
     <connection>:git:git@github.com:quarkiverse/quarkus-scala3.git</connection>
