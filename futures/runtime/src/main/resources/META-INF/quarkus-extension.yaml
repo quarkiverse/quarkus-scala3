@@ -1,0 +1,11 @@
+name: Scala 3 Futures Support
+description: Support for using `Future[T]` and `Promise[T]` in REST Endpoints.
+metadata:
+  keywords:
+    - scala
+    - scala3
+    - futures
+  guide: https://docs.quarkiverse.io/quarkus-scala3/dev/index.html
+  categories:
+    - "alt-languages"
+  status: "preview"

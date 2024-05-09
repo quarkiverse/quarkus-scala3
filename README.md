@@ -61,6 +61,7 @@ VERSIONS = [
 
 dependencies {
     implementation "io.quarkiverse.scala:quarkus-scala3:${VERSIONS.QUARKUS_SCALA3}"
+    implementation "io.quarkiverse.scala:quarkus-scala3-deployment:${VERSIONS.QUARKUS_SCALA3}"
     implementation("org.scala-lang:scala3-compiler_3") {
         version {
             strictly VERSIONS.SCALA3
@@ -133,7 +134,12 @@ In your `pom.xml` file, add:
 <dependency>
     <groupId>io.quarkiverse.scala</groupId>
     <artifactId>quarkus-scala3</artifactId>
-    <version>0.0.1<version>
+    <version>1.0.0<version>
+</dependency>
+<dependency>
+  <groupId>io.quarkiverse.scala</groupId>
+  <artifactId>quarkus-scala3-deployment</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -440,6 +446,54 @@ def mkRoutes(router: Router) =
     })
 ```
 
+
+### `Future[T]` and `Promise[T]` support in Rest-Endpoints
+
+This extension allows you to return `Future[T]` and `Promise[T]` from your rest-endpoints.
+
+```scala
+
+@Path("/")
+class GreetingResource
+
+    @GET
+    @Path("/greet/future")
+    @Produces(Array(TEXT_PLAIN))
+    def futureGreeting(): Future[String] =
+       Future.successful("Hello from the future")
+    end futureGreeting
+
+    @GET
+    @Path("/greet/promise")
+    def promiseGreeting(): Promise[String] =
+      Promise.successful("Hello from the promise")
+    end promiseGreeting
+
+end GreetingResource
+```    
+
+If the `Future[T]` or `Promise[T]` fails, the normal exception handling is invoked.
+
+Make sure to have the following dependencies in your `pom.xml` to make it work:
+
+```xml
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3-deployment</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+```
+
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -452,6 +506,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/GavinRay97"><img src="https://avatars.githubusercontent.com/u/26604994?v=4?s=100" width="100px;" alt="Gavin Ray"/><br /><sub><b>Gavin Ray</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=GavinRay97" title="Code">💻</a> <a href="#maintenance-GavinRay97" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://lesincroyableslivres.fr/"><img src="https://avatars.githubusercontent.com/u/1279749?v=4?s=100" width="100px;" alt="Guillaume Smet"/><br /><sub><b>Guillaume Smet</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=gsmet" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/domdorn"><img src="https://avatars.githubusercontent.com/u/100349?v=4?s=100" width="100px;" alt="Dominik Dorn"/><br /><sub><b>Dominik Dorn</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=domdorn" title="Code">🚀🍺💻</a></td>
     </tr>
   </tbody>
 </table>
@@ -462,3 +517,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## TODOs
+ - correctly generate OpenAPI Spec for methods returning `Future[T]` or `Promise[T]`, e.g. similar to [Quarkus #8499](https://github.com/quarkusio/quarkus/issues/8499)
+ - Quarkus-Arc has special handling for `CompletionStage[T]`, maybe we should add similar handling for `Future[T]` and `Promise[T]`, see [ActiveRequestContextInterceptor](https://github.com/quarkusio/quarkus/blob/24d3e5262d20fdaa8c056d59f012f8c7b5b1c5c8/independent-projects/arc/runtime/src/main/java/io/quarkus/arc/impl/ActivateRequestContextInterceptor.java) ?
