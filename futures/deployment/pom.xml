@@ -17,7 +17,7 @@
             <artifactId>quarkus-arc-deployment</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.scala</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>quarkus-scala3-futures</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -40,11 +40,6 @@
             <artifactId>quarkus-rest-server-spi-deployment</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala3-library_3</artifactId>
-            <scope>compile</scope>
-        </dependency>
 
     </dependencies>
 

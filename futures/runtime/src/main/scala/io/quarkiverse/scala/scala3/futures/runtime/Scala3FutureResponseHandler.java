@@ -1,4 +1,4 @@
-package io.quarkiverse.scala.scala3.deployment;
+package io.quarkiverse.scala.scala3.futures.runtime;
 
 import org.jboss.resteasy.reactive.server.core.ResteasyReactiveRequestContext;
 import org.jboss.resteasy.reactive.server.spi.ServerRestHandler;

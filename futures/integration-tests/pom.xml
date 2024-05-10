@@ -24,11 +24,11 @@
             <artifactId>quarkus-scala3-futures</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.quarkiverse.scala</groupId>
-            <artifactId>quarkus-scala3-futures-deployment</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.quarkiverse.scala</groupId>-->
+<!--            <artifactId>quarkus-scala3-futures-deployment</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala3-compiler_3</artifactId>

@@ -1,4 +1,4 @@
-package io.quarkiverse.scala.scala3.deployment;
+package io.quarkiverse.scala.scala3.futures.runtime;
 
 import java.util.Collections;
 import java.util.List;

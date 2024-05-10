@@ -1,5 +1,5 @@
 name: Scala 3 Futures Support
-description: Support for using `Future[T]` and `Promise[T]` in REST Endpoints.
+description: Support for using Future[T] and Promise[T] in REST Endpoints.
 metadata:
   keywords:
     - scala

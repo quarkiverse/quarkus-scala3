@@ -1,6 +1,6 @@
 package io.quarkiverse.scala.scala3.futures.deployment;
 
-import io.quarkiverse.scala.scala3.deployment.Scala3FutureReturnTypeMethodScanner;
+import io.quarkiverse.scala.scala3.futures.runtime.Scala3FutureReturnTypeMethodScanner;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.resteasy.reactive.server.spi.MethodScannerBuildItem;
