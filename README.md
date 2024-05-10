@@ -520,4 +520,4 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## TODOs
  - correctly generate OpenAPI Spec for methods returning `Future[T]` or `Promise[T]`, e.g. similar to [Quarkus #8499](https://github.com/quarkusio/quarkus/issues/8499)
- - Quarkus-Arc has special handling for `CompletionStage[T]`, maybe we should add similar handling for `Future[T]` and `Promise[T]`, see [ActiveRequestContextInterceptor](https://github.com/quarkusio/quarkus/blob/24d3e5262d20fdaa8c056d59f012f8c7b5b1c5c8/independent-projects/arc/runtime/src/main/java/io/quarkus/arc/impl/ActivateRequestContextInterceptor.java) ?
+ - ArC (Quarkus' CDI implementation) has special handling for `CompletionStage[T]`, maybe we should add similar handling for `Future[T]` and `Promise[T]`, see [ActiveRequestContextInterceptor](https://github.com/quarkusio/quarkus/blob/24d3e5262d20fdaa8c056d59f012f8c7b5b1c5c8/independent-projects/arc/runtime/src/main/java/io/quarkus/arc/impl/ActivateRequestContextInterceptor.java) ?
