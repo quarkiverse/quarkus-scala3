@@ -4,48 +4,41 @@ import org.jboss.resteasy.reactive.server.core.ResteasyReactiveRequestContext
 import org.jboss.resteasy.reactive.server.spi.ServerRestHandler
 import zio.ZIO
 
-import java.lang.reflect.ParameterizedType
 import scala.jdk.CollectionConverters.*
-import scala.util.Failure
-import scala.util.Success
 
 class Scala3ZIOResponseHandler() extends ServerRestHandler {
 
   override def handle(requestContext: ResteasyReactiveRequestContext): Unit = {
     val result = requestContext.getResult
 
-    type R = Any
-    type E = Throwable
-    type A = Any
     /*
-    // TODO at the moment, we're just stupidly assume, the effect has no environment
-    //  and the error type is a throwable. We need to figure out a way on how to access
-    //  the type arguments of the ZIO effect in a more structured way.
-    // At the moment, a Environment of e.g. String with Int will be read as java.lang.Object,
-    // so we loose the type information which could be used for dependency injection
-    println("in handle of Scala3ZIOResponseHandler")
+      TODO if we're able to read the environment from the effect, we might be able to hook into
+      Quarkus dependency injection mechanism to fill it here. For now, we can only assume its any.
+     */
+    type R = Any
 
-    val p = requestContext.getGenericReturnType.asInstanceOf[ParameterizedType]
-    val typeArgs = p.getActualTypeArguments.toSeq
-    val (environment, errorType, successType) = (typeArgs(0), typeArgs(1), typeArgs(2))
+    /* fixing the error type to Throwable. We can be sure its this type, as we've checked
+       it before in io.quarkiverse.scala.scala3.zio.deployment.Scala3ZIOReturnTypeMethodScanner.scan
+       There it can only be Nothing, or Throwable or subtypes of Throwable, so either way, we're
+       safe to assume it's Throwable here.
+     */
+    type E = Throwable
 
-    println(s"environment: $environment")
-    println(s"errorType: $errorType")
-    println(s"successType: $successType")
-    */
-    result match
-      case r: ZIO[R, E, A] =>
-        requestContext.suspend()
-        val f = zio.Unsafe.unsafe(u => zio.Runtime.default.unsafe.runToFuture(r)(zio.Trace.empty, u))
-        f.onComplete {
-          case Success(value) =>
-            requestContext.setResult(value)
-            requestContext.resume()
-          case Failure(exception) =>
-            requestContext.handleException(exception, true)
-            requestContext.resume()
-        }(scala.concurrent.ExecutionContext.global)
+    /*  We assume any as return type, as quarkus also accepts any object as return type. 
+     */
+    type A = Any
 
-      case _ => ()
+    requestContext.suspend()
+    val r = result.asInstanceOf[ZIO[R, E, A]]
+    
+    val r1 = r.fold(e => {
+      requestContext.handleException(e)
+      requestContext.resume()
+    }, a => {
+        requestContext.setResult(a)
+        requestContext.resume()
+    })
+    
+    zio.Unsafe.unsafe(u => zio.Runtime.default.unsafe.runToFuture(r1)(zio.Trace.empty, u))
   }
 }

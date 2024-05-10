@@ -23,7 +23,6 @@ class Scala3ZioResourceTest {
 
   @Test
   def `test zio-string Endpoint`(): Unit = {
-    println("running `test zio-string Endpoint`")
     Given {
       _.params("something", "value")
     }.When {
@@ -32,5 +31,41 @@ class Scala3ZioResourceTest {
       _.statusCode(200).body(is("Hello ZIO"))
     }
   }
+
+  @Test
+  def `test zio Task Endpoint`(): Unit = {
+    Given {
+      _.params("a", "value")
+    }.When {
+      _.get("/scala3-zio/zio-task")
+    }.Then {
+      _.statusCode(200).body(is("Hello ZIO Task: value"))
+    }
+  }
+
+  @Test
+  def `test zio UIO Endpoint`(): Unit = {
+    Given {
+      _.params("a", "value")
+    }.When {
+      _.get("/scala3-zio/zio-uio")
+    }.Then {
+      _.statusCode(200).body(is("Hello ZIO UIO: value"))
+    }
+  }
+
+  @Test
+  def `test zio IO Endpoint`(): Unit = {
+    Given {
+      _.params("a", "value")
+    }.When {
+      _.get("/scala3-zio/zio-io")
+    }.Then {
+      _.statusCode(200).body(is("Hello ZIO IO: value"))
+    }
+  }
+  
+  
+  
 
 }

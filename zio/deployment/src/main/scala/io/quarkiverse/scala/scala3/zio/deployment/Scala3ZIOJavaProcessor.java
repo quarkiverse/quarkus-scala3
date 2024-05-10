@@ -4,7 +4,7 @@ import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.resteasy.reactive.server.spi.MethodScannerBuildItem;
 
-public class Scala3ZioJavaProcessor {
+public class Scala3ZIOJavaProcessor {
 
     @BuildStep
     public FeatureBuildItem feature() {
