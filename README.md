@@ -449,7 +449,7 @@ def mkRoutes(router: Router) =
 
 ### `Future[T]` and `Promise[T]` support in REST endpoints
 
-This extension allows you to return `Future[T]` and `Promise[T]` from your rest-endpoints.
+This extension allows you to return `Future[T]` and `Promise[T]` from your REST endpoints.
 
 ```scala
 
