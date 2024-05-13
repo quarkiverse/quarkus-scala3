@@ -18,7 +18,7 @@
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
   - [Contributors ✨](#contributors-)
 
-## Introduction 
+## Introduction
 
 This extension provides support for Scala 3 in Quarkus.
 
@@ -51,43 +51,23 @@ repositories {
 }
 
 VERSIONS = [
-    QUARKUS_SCALA3: "0.0.1",
-    SCALA3        : "3.1.0",
-    SCALA_LIBRARY : "2.13.6",
-    // Scala Jackson at time of writing doesn't support Scala 3 Enum's natively. It requires another library.
-    // That library doesn't support same version of Jackson that Quarkus BOM uses (2.12.5), so this is the best compromise
-    // https://search.maven.org/artifact/com.github.pjfanning/jackson-module-scala3-enum_3/2.12.3/jar
-    JACKSON       : "2.12.3"
+    QUARKUS:        "3.10.0",
+    QUARKUS_SCALA3: "1.0.0",
+    SCALA3        : "3.3.3",
 ]
 
 dependencies {
+    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${VERSIONS.QUARKUS}")
     implementation "io.quarkiverse.scala:quarkus-scala3:${VERSIONS.QUARKUS_SCALA3}"
-    implementation("org.scala-lang:scala3-compiler_3") {
-        version {
-            strictly VERSIONS.SCALA3
-        }
-    }
-    implementation("org.scala-lang:scala3-library_3") {
-        version {
-            strictly VERSIONS.SCALA3
-        }
-    }
-    implementation("org.scala-lang:scala-library") {
-        version {
-            strictly VERSIONS.SCALA_LIBRARY
-        }
-    }
+    implementation "org.scala-lang:scala3-library_3:${VERSIONS.SCALA3}"
+    implementation "org.scala-lang:scala3-compiler_3:${VERSIONS.SCALA3}"
 
-    // Quarkus comes with Scala 2 distributed in it's Bill-of-Materials unfortunately
-    // It's Scala 2.12.13, which is not ABI compatible -- With Scala 3, we need to exclude this entirely
-    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))  {
-         exclude group: 'org.scala-lang', module: 'scala-library'
-    }
     implementation "io.quarkus:quarkus-arc"
     implementation "io.quarkus:quarkus-resteasy-reactive"
 
-    implementation "com.fasterxml.jackson.module:jackson-module-scala_3:${VERSIONS.JACKSON}"
-    implementation "com.github.pjfanning:jackson-module-scala3-enum_3:${VERSIONS.JACKSON}"
+    implementation "io.quarkus:quarkus-jackson"
+    implementation "io.quarkus:quarkus-rest-jackson"
+    implementation "com.fasterxml.jackson.module:jackson-module-scala_3"
 
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.rest-assured:rest-assured"
@@ -97,31 +77,24 @@ group = "org.acme"
 version = "1.0.0-SNAPSHOT"
 
 java {
-    // Set to 17 for performance reasons, feel free to change to 11 or 8
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType(ScalaCompile) {
     scalaCompileOptions.additionalParameters = [
-        "-feature", // Emit warnings and locations for features that should be imported explicitly
-        "-explain", // Explain (type) errors in more detail
-        "-Ysafe-init", // Ensure safe initialization of objects (prevent null object init)
-        "-Yrequire-targetName", // Warn if an operator is defined without a @targetName annotation
-        // "-Yexplicit-nulls", // Make reference types non-nullable. Nullable types can be expressed with unions: e.g. String|Null.
-
-        // I am unsure if this is required for proper tooling to work. Metals/IntelliJ may already cover this.
-        "-Xsemanticdb", // Store information in SemanticDB
+        "-feature",
+        "-Wunused:all",
     ]
 }
 
 compileJava {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-parameters'
+    options.encoding = "UTF-8"
+    options.compilerArgs << "-parameters"
 }
 
 compileTestJava {
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
 ```
 
@@ -131,43 +104,40 @@ If you want to use this extension, you need to add the `io.quarkiverse.scala:qua
 In your `pom.xml` file, add:
 
 ```xml
-<dependency>
-    <groupId>io.quarkiverse.scala</groupId>
-    <artifactId>quarkus-scala3</artifactId>
-    <version>0.0.1<version>
-</dependency>
+<dependencies>
+...
+  <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3</artifactId>
+      <version>0.0.1<version>
+  </dependency>
+...
 ```
 
-Then, you will need to install the Scala 3 compiler, the Scala Maven plugin, and to fix an odd bug with the way that the Scala 3 compiler Maven dependencies are resolved.
-
-Due to Scala 2 version in upstream `Quarkus BOM`, the wrong version of `scala-library` (a transitive dependency: `scala3-compiler_3` -> `scala3-library_3` -> `scala-library`) is resolved.
-
-This causes binary incompatibilities -- and Scala to break. In order to fix this, you just need to manually align the version of `scala-library` to the one listed as used by the version of `scala3-library_3` that's the same as the `scala3-compiler_3` version.
-
-So for `scala3-compiler_3` = `3.0.0`, then `scala3-library_3` = `3.0.0`, and we check the `scala-library` version it uses:
-- https://mvnrepository.com/artifact/org.scala-lang/scala3-library_3/3.0.0
-
-Here, we can see that it was compiled with `2.13.5` in it's dependencies. So that's what we set in ours:
+Then, you will need to add the Scala 3 compiler and library and the Scala Maven plugin:
 
 ```xml
 <properties>
-    <scala-maven-plugin.version>4.5.3</scala-maven-plugin.version>
-    <scala.version>3.1.0</scala.version>
-    <scala-library.version>2.13.6</scala-library.version>
+    <scala-maven-plugin.version>4.9.1</scala-maven-plugin.version>
+    <scala.version>3.3.3</scala.version>
 </properties>
 
 <dependencies>
     <!-- Scala Dependencies -->
     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala3-compiler_3</artifactId>
-        <version>${scala.version}</version>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3</artifactId>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
-        <!-- Version manually aligned to scala3-library_3:3.0.0 dependency -->
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-library</artifactId>
-        <version>${scala-library.version}</version>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala3-library_3</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala3-compiler_3</artifactId>
+      <version>${scala.version}</version>
     </dependency>
 </dependencies>
 
@@ -203,10 +173,10 @@ Here, we can see that it was compiled with `2.13.5` in it's dependencies. So tha
             <scalaVersion>${scala.version}</scalaVersion>
             <!-- Some solid defaults, change if you like -->
             <args>
-                <arg>-deprecated</arg>
-                <arg>-explain</arg>
+                <arg>-Wunused:all</arg>
                 <arg>-feature</arg>
-                <arg>-Ysafe-init</arg>
+                <arg>-deprecation</arg>
+                <arg>-Ysemanticdb</arg>
             </args>
         </configuration>
     </plugin>
@@ -253,28 +223,17 @@ class MyTest:
 
 ### Scala and Jackson serialization for JSON with Scala Enum support
 
-If using Jackson for serialization, you probably want JSON support for case class and Enum.
-There are two libraries you need to add to your project to enable this:
-
-1. The standard Jackson Scala module
-2. An addon module from one of the Jackson Scala maintainers for Scala 3 enums that hasn't made its way into the official module yet
+If using Jackson for serialization, you probably want JSON support for case class and Enum. Scala Jackson module already supports Scala 3 Enums built-in.
 
 To set this up:
 
-- Add the following to your dependencies
+- Add the following to your dependencies (in addition to existing `quarkus-jackson` and `quarkus-rest-jackson` extensions).
 
 ```xml
 <!-- JSON Serialization Dependencies -->
 <dependency>
   <groupId>com.fasterxml.jackson.module</groupId>
   <artifactId>jackson-module-scala_3</artifactId>
-  <version>2.16.1</version>
-</dependency>
-
-<dependency>
-  <groupId>com.github.pjfanning</groupId>
-  <artifactId>jackson-module-scala3-enum_3</artifactId>
-  <version>2.16.0</version>
 </dependency>
 ```
 
@@ -438,6 +397,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/GavinRay97"><img src="https://avatars.githubusercontent.com/u/26604994?v=4?s=100" width="100px;" alt="Gavin Ray"/><br /><sub><b>Gavin Ray</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=GavinRay97" title="Code">💻</a> <a href="#maintenance-GavinRay97" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://lesincroyableslivres.fr/"><img src="https://avatars.githubusercontent.com/u/1279749?v=4?s=100" width="100px;" alt="Guillaume Smet"/><br /><sub><b>Guillaume Smet</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=gsmet" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/carlosedp"><img src="https://avatars.githubusercontent.com/u/20382?s=400&u=ea5348eac48fb226dc5bc4954f5408764c5914a6&v=4" width="100px;" alt="Carlos Eduardo de Paula"/><br /><sub><b>Carlos Eduardo de Paula</b></sub></a><br /><a href="https://github.com/quarkiverse/quarkus-scala3/commits?author=carlosedp" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
