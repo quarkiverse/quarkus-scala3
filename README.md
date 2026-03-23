@@ -16,6 +16,7 @@
     - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
     - [Scala DSL for rest-assured (similar to Kotlin DSL)](#scala-dsl-for-rest-assured-similar-to-kotlin-dsl)
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
+- [Quarkus - Scala3 - Futures](#quarkus---scala3---futures)
 
 ## Introduction 
 
@@ -133,7 +134,7 @@ In your `pom.xml` file, add:
 <dependency>
     <groupId>io.quarkiverse.scala</groupId>
     <artifactId>quarkus-scala3</artifactId>
-    <version>0.0.1<version>
+    <version>1.0.0<version>
 </dependency>
 ```
 
@@ -440,6 +441,50 @@ def mkRoutes(router: Router) =
     })
 ```
 
+# Quarkus - Scala3 - Futures
+
+# `Future[T]` and `Promise[T]` support in REST endpoints
+
+The `quarkus-scala3-futures` extension allows you to return `Future[T]` and `Promise[T]` from your REST endpoints.
+
+```scala
+
+@Path("/")
+class GreetingResource
+
+    @GET
+    @Path("/greet/future")
+    @Produces(Array(TEXT_PLAIN))
+    def futureGreeting(): Future[String] =
+       Future.successful("Hello from the future")
+    end futureGreeting
+
+    @GET
+    @Path("/greet/promise")
+    def promiseGreeting(): Promise[String] =
+      Promise.successful("Hello from the promise")
+    end promiseGreeting
+
+end GreetingResource
+```    
+
+If the `Future[T]` or `Promise[T]` fails, the normal exception handling is invoked.
+
+Make sure to have the following dependency in your `pom.xml` to make it work:
+
+```xml
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3-futures</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+```
+
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -462,3 +507,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## TODOs
+ - correctly generate OpenAPI Spec for methods returning Future[T] or Promise[T], e.g. similar to [Quarkus #8499](https://github.com/quarkusio/quarkus/issues/8499)
+ - ArC (Quarkus' CDI implementation) has special handling for CompletionStage[T], maybe we should add similar handling for Future[T] and Promise[T], see [ActiveRequestContextInterceptor](https://github.com/quarkusio/quarkus/blob/24d3e5262d20fdaa8c056d59f012f8c7b5b1c5c8/independent-projects/arc/runtime/src/main/java/io/quarkus/arc/impl/ActivateRequestContextInterceptor.java) ?
