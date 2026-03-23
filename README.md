@@ -16,6 +16,7 @@
     - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
     - [Scala DSL for rest-assured (similar to Kotlin DSL)](#scala-dsl-for-rest-assured-similar-to-kotlin-dsl)
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
+- [Quarkus - Scala3 - ZIO](#quarkus---scala3---zio)
 
 ## Introduction 
 
@@ -462,3 +463,61 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+# Quarkus - Scala3 - ZIO
+Add these dependencies to your `pom.xml` (respectively gradle):
+
+```xml
+    <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3-zio</artifactId>
+      <version>999-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkiverse.scala</groupId>
+      <artifactId>quarkus-scala3-zio-deployment</artifactId>
+      <version>999-SNAPSHOT</version>
+    </dependency>
+```
+
+Now you're able to use a `ZIO[Any, E <: Throwable, A]` in your REST-Resources, e.g.
+
+```scala
+    final case class AsyncGreetingResponse(message: String, ip: String, time: Long)
+
+    @GET
+    @Path("/greet/async")
+    @Produces(Array(APPLICATION_JSON))
+    def asyncGreeting(): Task[AsyncGreetingResponse] =
+        val numsAmount = 10
+        Log.debug(s"Generating $numsAmount numbers asynchronously...")
+        val startTime = System.currentTimeMillis()
+        // Get the IP address asynchronously
+        val IPFuture = ZIO.fromFuture(_ => getOwnIP().map(_.body).recover:
+            case e: Exception =>
+                Log.error("Failed to get the IP address.")
+                Left("Failed to get IP"))
+
+        val futureSum = ZIO.foreachPar((1 to numsAmount)){i => generateNum()}.map(_.sum)
+        for
+            sumF <- futureSum.fork
+            ipF  <- IPFuture.map(_.merge).fork
+            result <- sumF.join zip ipF.join
+            (sum, ip) = result
+        yield
+            val endTime = System.currentTimeMillis() - startTime
+            Log.debug(s"My IP is: $ip")
+            Log.debug(s"Generated $numsAmount numbers asynchronously in ${endTime}ms")
+
+            AsyncGreetingResponse(
+              s"The sum of the $numsAmount generated numbers is $sum. Was generated asynchronously in ${endTime}ms.\nYour IP is: $ip.",
+              ip,
+            endTime)
+
+    end asyncGreeting
+
+```
+
+Please note that we currently don't support anything in the Environment `R`, as we don't have a way
+to transfer this information from Java to Scala. Also, your error type needs to be either Nothing
+or a (subtype of) Throwable.
