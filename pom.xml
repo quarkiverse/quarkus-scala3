@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.quarkiverse</groupId>
     <artifactId>quarkiverse-parent</artifactId>
-    <version>15</version>
+    <version>22</version>
   </parent>
   <groupId>io.quarkiverse.scala</groupId>
   <artifactId>quarkus-scala3-parent</artifactId>
@@ -24,7 +24,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <quarkus.version>3.6.4</quarkus.version>
+    <quarkus.version>3.33.3.2</quarkus.version>
   </properties>
   <dependencyManagement>
     <dependencies>

@@ -13,7 +13,7 @@
   - [Passing Scala compiler args in Quarkus Dev Mode](#passing-scala-compiler-args-in-quarkus-dev-mode)
   - [Useful tips and tricks for building Quarkus apps with Scala, common patterns](#useful-tips-and-tricks-for-building-quarkus-apps-with-scala-common-patterns)
     - ["No tests were found"?! How can that be?](#no-tests-were-found-how-can-that-be)
-    - [Configuring Scala Jackson and the addon-on "Enum" module for JSON support](#configuring-scala-jackson-and-the-addon-on-enum-module-for-json-support)
+    - [Configuring Jackson for JSON support](#configuring-jackson-for-json-support)
     - [Scala DSL for rest-assured (similar to Kotlin DSL)](#scala-dsl-for-rest-assured-similar-to-kotlin-dsl)
     - [Functional HTTP routes (Vert.x handlers)](#functional-http-routes-vertx-handlers)
 
@@ -139,20 +139,24 @@ In your `pom.xml` file, add:
 
 Then, you will need to install the Scala 3 compiler, the Scala Maven plugin, and to fix an odd bug with the way that the Scala 3 compiler Maven dependencies are resolved.
 
-Due to Scala 2 version in upstream `Quarkus BOM`, the wrong version of `scala-library` (a transitive dependency: `scala3-compiler_3` -> `scala3-library_3` -> `scala-library`) is resolved.
+The `Quarkus BOM` manages `org.scala-lang:scala-library` for the Scala 2 extension, so it overrides the version that `scala3-compiler_3` -> `scala3-library_3` -> `scala-library` would otherwise resolve to.
 
-This causes binary incompatibilities -- and Scala to break. In order to fix this, you just need to manually align the version of `scala-library` to the one listed as used by the version of `scala3-library_3` that's the same as the `scala3-compiler_3` version.
+This causes binary incompatibilities -- and Scala to break. The fix is to declare `scala-library` yourself, aligned to the version that `scala3-library_3` depends on, so that your declaration wins over the BOM.
 
-So for `scala3-compiler_3` = `3.0.0`, then `scala3-library_3` = `3.0.0`, and we check the `scala-library` version it uses:
-- https://mvnrepository.com/artifact/org.scala-lang/scala3-library_3/3.0.0
+Which version that is changed with Scala 3.8.0:
 
-Here, we can see that it was compiled with `2.13.5` in it's dependencies. So that's what we set in ours:
+- **Scala 3.8.0 and later**: `scala3-library_3` depends on `scala-library` at the same `3.x` version, so set it to the compiler version. For `scala3-compiler_3` = `3.9.0`, `scala-library` = `3.9.0`.
+- **Before Scala 3.8.0**: `scala3-library_3` depends on a `2.13.x` `scala-library`, so look that version up and use it. For `scala3-compiler_3` = `3.3.6`, `scala-library` = `2.13.16`.
+
+You can always check the exact dependency in the published POM, for example https://repo1.maven.org/maven2/org/scala-lang/scala3-library_3/3.9.0/scala3-library_3-3.9.0.pom.
+
+So for Scala 3.9.0:
 
 ```xml
 <properties>
-    <scala-maven-plugin.version>4.5.3</scala-maven-plugin.version>
-    <scala.version>3.1.0</scala.version>
-    <scala-library.version>2.13.6</scala-library.version>
+    <scala-maven-plugin.version>4.9.10</scala-maven-plugin.version>
+    <scala.version>3.9.0</scala.version>
+    <scala-library.version>3.9.0</scala-library.version>
 </properties>
 
 <dependencies>
@@ -163,7 +167,7 @@ Here, we can see that it was compiled with `2.13.5` in it's dependencies. So tha
         <version>${scala.version}</version>
     </dependency>
     <dependency>
-        <!-- Version manually aligned to scala3-library_3:3.0.0 dependency -->
+        <!-- Version manually aligned to the scala3-library_3:${scala.version} dependency -->
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
         <version>${scala-library.version}</version>
@@ -250,30 +254,22 @@ class MyTest:
     assert(2 == 2)
 ```
 
-### Configuring Scala Jackson and the addon-on "Enum" module for JSON support
+### Configuring Jackson for JSON support
 
 You probably want JSON support for case class and enum serialization.
-There are two things you need to enable this, as of the time of writing:
-
-1. The standard Jackson Scala module
-2. An addon module from one of the Jackson Scala maintainers for Scala 3 enums that hasn't made its way into the official module yet
+The standard Jackson Scala module covers both: Scala 3 enum support used to live in a separate
+addon module, but it was merged into `jackson-module-scala` in its 2.17.0 release and
+`DefaultScalaModule` now includes it.
 
 To set this up:
 
-- Add the following to your dependencies
+- Add the following to your dependencies. The version is managed by the `Quarkus BOM`, so leave it out.
   
 ```xml
 <!-- JSON Serialization Dependencies -->
 <dependency>
-    <groupId>com.github.pjfanning</groupId>
-    <artifactId>jackson-module-scala3-enum_3</artifactId>
-    <version>2.12.3</version>
-</dependency>
-
-<dependency>
     <groupId>com.fasterxml.jackson.module</groupId>
-    <artifactId>jackson-module-scala_2.13</artifactId>
-    <version>2.12.3</version>
+    <artifactId>jackson-module-scala_3</artifactId>
 </dependency>
 ```
 
@@ -282,21 +278,17 @@ To set this up:
 ```scala
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.github.pjfanning.`enum`.EnumModule
 import io.quarkus.jackson.ObjectMapperCustomizer
 
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 
 // https://quarkus.io/guides/rest-json#jackson
 @Singleton
 class Scala3ObjectMapperCustomizer extends ObjectMapperCustomizer:
   def customize(mapper: ObjectMapper): Unit =
-    // General Scala support
+    // General Scala support, including Scala 3 enums
     // https://github.com/FasterXML/jackson-module-scala
     mapper.registerModule(DefaultScalaModule)
-    // Suport for Scala 3 Enums
-    // https://github.com/pjfanning/jackson-module-scala3-enum
-    mapper.registerModule(EnumModule)
 ```
 
 The API is usable like this:
@@ -307,7 +299,7 @@ import io.quarkus.test.junit.QuarkusTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.{DisplayName, Test}
 
-import javax.inject.Inject
+import jakarta.inject.Inject
 import scala.collection.JavaConverters.*
 
 
