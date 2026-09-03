@@ -8,10 +8,27 @@
   </parent>
   <artifactId>quarkus-scala3-integration-tests</artifactId>
   <name>Quarkus - Scala3 - Integration Tests</name>
+  <properties>
+    <scala.version>3.9.0</scala.version>
+    <scala-maven-plugin.version>4.9.10</scala-maven-plugin.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala3-compiler_3</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Overrides the scala-library 2.13.x managed by the Quarkus BOM for the
+           Scala 2 extension. From Scala 3.8.0 on, scala3-library_3 depends on
+           scala-library at the same 3.x version, so it is aligned to the compiler. -->
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${scala.version}</version>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.scala</groupId>
@@ -31,6 +48,28 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+        <version>${scala-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
@@ -81,7 +120,7 @@
         </plugins>
       </build>
       <properties>
-        <quarkus.package.type>native</quarkus.package.type>
+        <quarkus.native.enabled>true</quarkus.native.enabled>
       </properties>
     </profile>
   </profiles>
